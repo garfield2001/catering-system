@@ -1,0 +1,12 @@
+/* Google Font: Source Sans Pro */
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback');
+/* SweetAlert2 */
+@import url('https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css');
+/* Toastr */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css');
+/* Theme style */
+@import url('https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css');
+/* DataTables */
+@import url('https://cdn.jsdelivr.net/npm/datatables.net-bs4@1.10.21/css/dataTables.bootstrap4.min.css');
+@import url('https://cdn.jsdelivr.net/npm/datatables.net-responsive-bs4@2.2.5/css/responsive.bootstrap4.min.css');
+@import url('https://cdn.jsdelivr.net/npm/datatables.net-buttons-bs4@1.7.1/css/buttons.bootstrap4.min.css');
