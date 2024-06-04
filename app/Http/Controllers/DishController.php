@@ -14,7 +14,7 @@ class DishController extends Controller
         // Retrieve the authenticated user
         $user = Auth::user();
 
-        $dishes = Dish::with(['package', 'parentDish'])->get();
+        $dishes = Dish::with(['package', 'parentDish', 'childDishes'])->get();
         $packages = Package::all();
         return view('admin.dashboard.dishes', [
             'user' => $user,
@@ -28,12 +28,12 @@ class DishController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'dish_id' => 'nullable|exists:dishes,id',
+            'parent_id' => 'nullable|exists:dishes,id',
             'package_id' => 'nullable|exists:packages,id',
             'price' => 'nullable|numeric',
         ]);
 
-        Dish::create($request->only('name', 'dish_id', 'package_id', 'price'));
+        Dish::create($request->only('name', 'parent_id', 'package_id', 'price'));
 
         return response()->json(['success' => true, 'message' => 'Dish added successfully.']);
     }
@@ -42,12 +42,12 @@ class DishController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'dish_id' => 'nullable|exists:dishes,id',
+            'parent_id' => 'nullable|exists:dishes,id',
             'package_id' => 'nullable|exists:packages,id',
             'price' => 'nullable|numeric',
         ]);
 
-        $dish->update($request->only('name', 'dish_id', 'package_id', 'price'));
+        $dish->update($request->only('name', 'parent_id', 'package_id', 'price'));
 
         return response()->json(['success' => true, 'message' => 'Dish deleted successfully.']);
     }

@@ -10,8 +10,7 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ asset('AdminLTE/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2"
-                    alt="User Image">
+                <img src="{{ asset('dist/img/user1-128x128.jpg') }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="#" class="d-block">{{ $user->first_name . ' ' . $user->last_name }}</a>
@@ -46,7 +45,7 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-header">CATERING</li>
+                <li class="nav-header">Admin</li>
                 <li class="nav-item">
                     <a href="{{ route('categories.index') }}" data-page="categories"
                         class="link nav-link {{ $title == 'Categories' ? 'active' : '' }}">
@@ -71,6 +70,16 @@
                         <i class="nav-icon fas fa-box"></i>
                         <p>
                             DISHES
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-header">Reservation</li>
+                <li class="nav-item">
+                    <a href="{{ route('reservations.index') }}" data-page="reservations"
+                        class="link nav-link {{ $title == 'Reservations' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            Reservations
                         </p>
                     </a>
                 </li>

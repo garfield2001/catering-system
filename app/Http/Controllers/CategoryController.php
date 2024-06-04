@@ -24,19 +24,16 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $name = ucwords($request->input('name')); // capitalizes first letter
-        $description = ucfirst($request->input('description')); // capitalizes first letter
 
         $request->merge([
             'name' => $name,
-            'description' => $description
         ]); // merge the modified input back into the request
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
         ]);
 
-        Category::create($request->only('name', 'description'));
+        Category::create($request->only('name'));
 
         return response()->json(['success' => true, 'message' => 'Category added successfully.']);
     }
@@ -44,19 +41,16 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $name = ucwords($request->input('name')); // capitalizes first letter
-        $description = ucfirst($request->input('description')); // capitalizes first letter
 
         $request->merge([
-            'name' => $name,
-            'description' => $description
+            'name' => $name
         ]); // merge the modified input back into the request
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string|max:255'
         ]);
 
-        $category->update($request->only('name', 'description'));
+        $category->update($request->only('name'));
 
         return response()->json(['success' => true, 'message' => 'Category updated successfully.']);
     }

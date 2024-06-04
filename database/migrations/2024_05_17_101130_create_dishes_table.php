@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('dishes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('package_id')->nullable();
-            $table->unsignedBigInteger('dish_id')->nullable();
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('name');
             $table->decimal('price', 10, 2)->nullable();
             $table->timestamps();
 
             $table->foreign('package_id')->references('id')->on('packages')->onDelete('set null');
-            $table->foreign('dish_id')->references('id')->on('dishes')->onDelete('set null');
+            $table->foreign('parent_id')->references('id')->on('dishes')->onDelete('set null');
         });
     }
 

@@ -28,7 +28,7 @@ class PackageController extends Controller
 
     public function store(Request $request)
     {
-        $name = ucfirst($request->input('name')); // capitalizes first letter
+        $name = ucwords($request->input('name')); // capitalizes first letter
 
         $request->merge([
             'name' => $name
@@ -47,7 +47,7 @@ class PackageController extends Controller
 
     public function update(Request $request, Package $package)
     {
-        $name = ucfirst($request->input('name')); // capitalizes first letter
+        $name = ucwords($request->input('name')); // capitalizes first letter
 
         $request->merge([
             'name' => $name

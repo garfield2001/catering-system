@@ -13,7 +13,8 @@
                 </div>
                 <div class="card-header">
                     <button id="add-dish-button" class="card-title btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> Add New</button>
+                        <i class="fa-solid fa-plus"></i> Add New Dish
+                    </button>
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
@@ -72,7 +73,7 @@
             }).buttons().container().appendTo('#table_wrapper .col-md-6:eq(0)');
 
             // Handle row hover effect
-            $('.package-row').hover(
+            $('.dish-row').hover(
                 function() {
                     $(this).css('cursor', 'pointer');
                 },
@@ -91,8 +92,16 @@
                         <form id="add-dish-form" method="POST" action="{{ route('dishes.store') }}">
                             @csrf
                             <div class="form-group">
-                                <label for="add-dish-name">Dish Name:</label>
-                                <input type="text" class="form-control" id="add-dish-name" name="name" required>
+                                <label for="add-dish-group">Group Dish:</label>
+                                <select class="form-control" id="add-dish-group" name="parent_id">
+                                    <option value="">Select Group</option>
+                                    @foreach ($dishes as $dish)
+                                        /* Fix Me */ 
+                                        @if ($dish->package_id)
+                                            <option value="{{ $dish->id }}"> {{ $dish->name }} </option>
+                                        @endif
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="add-dish-package">Package:</label>
@@ -104,13 +113,8 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="add-dish-group">Group Dish:</label>
-                                <select class="form-control" id="add-dish-group" name="dish_id">
-                                    <option value="">Select Group</option>
-                                    @foreach ($dishes as $parentDish)
-                                        <option value="{{ $parentDish->id }}">{{ $parentDish->name }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="add-dish-name">Dish Name:</label>
+                                <input type="text" class="form-control" id="add-dish-name" name="name" required>
                             </div>
                             <div class="form-group">
                                 <label for="add-dish-price">Price:</label>
@@ -163,15 +167,55 @@
             $('.dish-row').click(function(event) {
                 event.preventDefault();
 
-                var dishId = $(this).data('dish-d');
+                var dishId = $(this).data('dish-id');
                 var dishGroup = $(this).data('dish-group');
                 var dishPackage = $(this).data('dish-package');
                 var dishName = $(this).data('dish-name');
                 var dishPrice = $(this).data('dish-price');
 
+
                 Swal.fire({
-                    title: `Edit or Delete`,
-                    title: `Edit or Delete <span style="color: #64B5F6;">${packageName}</span>?`,
+                    title: `Edit <span style="color: #64B5F6;">${dishName}</span>?`,
+                    html: `
+                    <form id="edit-dish-form-${dishId}" method="POST" action="/admin/dishes/${dishId}">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="PUT">
+                        <input type="hidden" id="edit-dish-id" name="id" value="${dishId}">
+                        <div class="form-group">
+                            <label for="edit-dish-group">Group Dish:</label>
+                            <select class="form-control" id="edit-dish-group" name="parent_id">
+                                <option value="">Select Group</option>
+                                @foreach ($dishes as $dish1)
+                                    @if ($dish1->package_id)
+                                        <option value="{{ $dish1->id }}">{{ $dish1->name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-dish-package">Package:</label>
+                            <select class="form-control" id="edit-dish-package" name="package_id">
+                                <option value="">Select Package</option>
+                                @foreach ($packages as $package)
+                                    <option value="{{ $package->id }}">{{ $package->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-dish-name">Dish Name:</label>
+                            <input type="text" class="form-control" id="edit-dish-name" name="name" value="${dishName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-dish-price">Price:</label>
+                            <input type="number" class="form-control" id="edit-dish-price" name="price" value="${dishPrice}">
+                        </div>
+                    </form>
+                    `,
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: `Edit`,
+                    denyButtonText: `Delete`,
+                    icon: 'warning',
                     showDenyButton: true,
                     showCancelButton: true,
                     confirmButtonText: `Edit`,
@@ -179,154 +223,60 @@
                     icon: 'warning',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Handle Edit Package button click with SweetAlert2
-
-                        event.preventDefault();
-
-                        var dishId = $(this).data('dish-id');
-                        var dishPackage = $(this).data('package-name');
-                        var parentDishName = $(this).data('parent-dish-name');
-                        var dishName = $(this).data('dish-name');
-                        var dishPrice = $(this).data('dish-price');
-
-                        Swal.fire({
-                            title: '<span style="color: #007bff; font-weight: bold;">Edit Dish</span>',
-                            html: `
-                                <form id="edit-dish-form-${dishId}" method="POST" action="/admin/dishes/${dishId}">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" id="edit-dish-id" name="id" value="${dishId}">
-                                    <div class="form-group">
-                                        <label for="edit-dish-name">Dish Name:</label>
-                                        <input type="text" class="form-control" id="edit-dish-name" name="name" value="${dishName}" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-dish-package">Package:</label>
-                                        <select class="form-control" id="edit-dish-package" name="package_id">
-                                            <option value="">Select Package</option>
-                                            @foreach ($packages as $package)
-                                                <option value="{{ $package->id }}" {{ $package->id == $dish->package_id ? 'selected' : '' }}>
-                                                    {{ $package->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-dish-group">Group Dish:</label>
-                                        <select class="form-control" id="edit-dish-group" name="dish_id">
-                                            <option value="">Select Group</option>
-                                            @foreach ($dishes as $parentDish)
-                                                <option value="{{ $parentDish->id }}" {{ $parentDish->id == $dish->dish_id ? 'selected' : '' }}>
-                                                    {{ $parentDish->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-dish-price">Price:</label>
-                                        <input type="number" class="form-control" id="edit-dish-price" name="price" value="${dishPrice}">
-                                    </div>
-                                </form>
-                            `,
-                            showCancelButton: true,
-                            confirmButtonText: 'Update',
-                            cancelButtonText: 'Cancel',
-                            icon: 'info',
-                            preConfirm: () => {
-                                const name = Swal.getPopup().querySelector(
-                                    '#edit-dish-name').value;
-                                if (!name) {
-                                    Swal.showValidationMessage(
-                                        `Please enter a dish name`);
-                                }
-                                return {
-                                    name: name
-                                }
+                        $.ajax({
+                            url: `/admin/dishes/${dishId}`,
+                            method: "PUT",
+                            data: $("#edit-dish-form-" + dishId).serialize(),
+                            success: function(data) {
+                                // Reload content
+                                loadContent(window.location.href);
+                                toastr.success('Dish updated successfully.');
                             },
-                            didOpen: () => {
-                                document.getElementById('edit-dish-name').focus();
+                            error: function(xhr, status, error) {
+                                // Handle error
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to edit dish. Please try again later.',
+                                    icon: 'error'
+                                });
                             }
+                        });
+                    } else if (result.isDenied) {
+                        Swal.fire({
+                            title: `Are you sure you want to delete the dish "${dishName}"?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, delete it!',
+                            cancelButtonText: 'Cancel',
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Submit the form via AJAX
+                                // Submit the delete request via AJAX
                                 $.ajax({
                                     url: `/admin/dishes/${dishId}`,
-                                    method: "PUT",
-                                    data: $("#edit-dish-form-" + dishId)
-                                        .serialize(),
+                                    headers: {
+                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]')
+                                            .attr('content')
+                                    },
+                                    method: 'DELETE',
                                     success: function(data) {
                                         // Reload content
                                         loadContent(window.location.href);
                                         toastr.success(
-                                            'Dish updated successfully.');
+                                            'Dish deleted successfully.');
                                     },
                                     error: function(xhr, status, error) {
                                         // Handle error
                                         Swal.fire({
                                             title: 'Error!',
-                                            text: 'Failed to edit dish. Please try again later.',
+                                            text: 'Failed to delete dish. Please try again later.',
                                             icon: 'error'
                                         });
                                     }
                                 });
                             }
                         });
-
-
-
-
-                    } else if (result.isDenied) {
-                        // Handle delete button click with SweetAlert2
-                        // Handle Delete Dish button click with confirmation
-                        $('.delete-dish-button').click(function(event) {
-                            event.preventDefault();
-
-                            var dishId = $(this).data('dish-id');
-                            var dishName = $(this).data('dish-name');
-
-                            Swal.fire({
-                                title: `Are you sure you want to delete the dish "${dishName}"?`,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Yes, delete it!',
-                                cancelButtonText: 'Cancel',
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    // Submit the delete request via AJAX
-                                    $.ajax({
-                                        url: `/admin/dishes/${dishId}`,
-                                        headers: {
-                                            'X-CSRF-TOKEN': $(
-                                                'meta[name="csrf-token"]'
-                                            ).attr('content')
-                                        },
-                                        method: 'DELETE',
-                                        success: function(data) {
-                                            // Reload content
-                                            loadContent(window.location
-                                                .href);
-                                            toastr.success(
-                                                'Dish deleted successfully.'
-                                            );
-                                        },
-                                        error: function(xhr, status,
-                                            error) {
-                                            // Handle error
-                                            Swal.fire({
-                                                title: 'Error!',
-                                                text: 'Failed to delete package. Please try again later.',
-                                                icon: 'error'
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        });
-
-
-
                     }
-                })
+                });
             });
         });
     </script>

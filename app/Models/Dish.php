@@ -9,7 +9,7 @@ class Dish extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['package_id', 'dish_id', 'name', 'price'];
+    protected $fillable = ['package_id', 'parent_id', 'name', 'price'];
 
     // Define the relationship with the Package model
     public function package()
@@ -20,12 +20,12 @@ class Dish extends Model
     // Define the self-referencing relationship
     public function parentDish()
     {
-        return $this->belongsTo(Dish::class, 'dish_id');
+        return $this->belongsTo(Dish::class, 'parent_id');
     }
 
     // Define the relationship to child dishes
     public function childDishes()
     {
-        return $this->hasMany(Dish::class, 'dish_id');
+        return $this->hasMany(Dish::class, 'parent_id');
     }
 }

@@ -14,7 +14,7 @@
 
                 <div class="card-header">
                     <button id="add-category-button" class="card-title btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> Add New
+                        <i class="fa-solid fa-plus"></i> Add New Category
                     </button>
                 </div>
                 <!-- /.card-header -->
@@ -24,19 +24,16 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Category Name</th>
-                                <th>Description</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($categories as $category)
                                 <tr data-category-id="{{ $category->id }}" data-category-name="{{ $category->name }}"
-                                    data-category-description="{{ $category->description }}"class="category-row">
+                                    class="category-row">
                                     <td data-toggle="tooltip" title="Edit or Delete this Row">
                                         {{ $category->id }}</td>
                                     <td data-toggle="tooltip" title="Edit or Delete {{ $category->name }}">
                                         {{ $category->name }}</td>
-                                    <td data-toggle="tooltip" title="Edit or Delete {{ $category->description }}">
-                                        {{ $category->description }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -44,7 +41,6 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Description</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -90,10 +86,6 @@
                                 <label for="add-category-name" style="text-align: left;">Name:</label>
                                 <input type="text" class="form-control" id="add-category-name" name="name"  required>
                             </div>
-                            <div class="form-group">
-                                <label for="add-category-description" style="text-align: left;">Description:</label>
-                                <textarea class="form-control" id="add-category-description" name="description" required></textarea>
-                            </div>
                         </form>
                     `,
                     showCancelButton: true,
@@ -103,21 +95,11 @@
                     preConfirm: () => {
                         const name = Swal.getPopup().querySelector('#add-category-name')
                             .value;
-                        const description = Swal.getPopup().querySelector(
-                                '#add-category-description')
-                            .value;
-
                         if (!name) {
                             Swal.showValidationMessage(`Please enter a Category Name`);
                         }
-
-                        if (!description) {
-                            Swal.showValidationMessage(`Please enter a Category Description`);
-                        }
-
                         return {
-                            name: name,
-                            description: description
+                            name: name
                         }
                     },
                     didOpen: () => {
@@ -155,7 +137,6 @@
 
                 var categoryId = $(this).data('category-id');
                 var categoryName = $(this).data('category-name');
-                var categoryDescription = $(this).data('category-description');
 
                 Swal.fire({
                     title: `Edit <span style="color: #64B5F6;">${categoryName}</span>? `,
@@ -170,110 +151,42 @@
                                 <input type="hidden" name="_method" value="PUT">
                                 <input type="text" class="form-control" id="edit-category-name" name="name" value="${categoryName}" required>
                             </div>
-                            <div class="form-group">
-                                <label for="edit-category-description">Description:</label>
-                                <input type="text" class="form-control" id="edit-category-description" name="description" value="${categoryDescription}" required>
-                            </div>
                         </form>
                     `,
                     showDenyButton: true,
                     showCancelButton: true,
-                    confirmButtonText: `Update`,
+                    confirmButtonText: `Edit`,
                     denyButtonText: `Delete?`,
                     icon: 'warning',
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // Handle Edit Category button click with SweetAlert2
-                        event.preventDefault();
-
-                        var categoryId = $(this).data('category-id');
-                        var categoryName = $(this).data('category-name');
-                        var categoryDescription = $(this).data('category-description');
-
-                        Swal.fire({
-                            title: '<span style="color: #007bff; font-weight: bold;">Edit Category</span>',
-                            html: `
-                                    <form id="edit-category-form-${categoryId}" method="POST" action="/admin/categories/${categoryId}">
-                                        @csrf
-                                        @method('PUT')
-                                        <input type="hidden" id="edit-category-id" name="id" value="${categoryId}">
-                                        <div class="form-group">
-                                            <label for="edit-category-name">Category Name:</label>
-                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                            <input type="hidden" name="_method" value="PUT">
-                                            <input type="text" class="form-control" id="edit-category-name" name="name" value="${categoryName}" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="edit-category-description">Description:</label>
-                                            <input type="text" class="form-control" id="edit-category-description" name="description" value="${categoryDescription}" required>
-                                        </div>
-                                    </form>
-                                `,
-                            showCancelButton: true,
-                            confirmButtonText: 'Update',
-                            cancelButtonText: 'Cancel',
-                            icon: 'warning',
-                            preConfirm: () => {
-                                const name = Swal.getPopup().querySelector(
-                                    '#edit-category-name').value;
-                                const description = Swal.getPopup().querySelector(
-                                    '#edit-category-description').value;
-                                if (!name) {
-                                    Swal.showValidationMessage(
-                                        `Please enter a category name`);
-                                }
-                                if (!description) {
-                                    Swal.showValidationMessage(
-                                        `Please enter a category description`);
-                                }
-                                return {
-                                    name: name,
-                                    description: description
-                                }
+                        $.ajax({
+                            url: "/admin/categories/" +
+                                categoryId, // Corrected URL construction
+                            method: "PUT",
+                            data: $("#edit-category-form-" +
+                                categoryId).serialize(),
+                            success: function(data) {
+                                toastr.success(
+                                    'Category updated successfully.'
+                                );
+                                // Reload content
+                                loadContent(window.location.href);
                             },
-                            didOpen: () => {
-                                // Set focus to the input field and select all text
-                                const input = document.getElementById(
-                                    'edit-category-name');
-                                input.focus();
-                                const value = input.value;
-                                input.value = '';
-                                input.value = value;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Submit the form via AJAX
-                                $.ajax({
-                                    url: "/admin/categories/" +
-                                        categoryId, // Corrected URL construction
-                                    method: "PUT",
-                                    data: $("#edit-category-form-" +
-                                        categoryId).serialize(),
-                                    success: function(data) {
-                                        // Reload content
-                                        loadContent(window.location
-                                            .href);
-                                        toastr.success(
-                                            'Category updated successfully.'
-                                        );
-                                    },
-                                    error: function(xhr, status,
-                                        error) {
-                                        // Handle error
-                                        Swal.fire({
-                                            title: 'Error!',
-                                            text: 'Failed to edit category. Please try again later.',
-                                            icon: 'error'
-                                        });
-                                    }
+                            error: function(xhr, status,
+                                error) {
+                                // Handle error
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to edit category. Please try again later.',
+                                    icon: 'error'
                                 });
                             }
                         });
 
                     } else if (result.isDenied) {
                         // Handle delete button click with SweetAlert2
-                        event.preventDefault(); // Prevent the form from submitting immediately
-
                         Swal.fire({
                             title: `Delete <span style="color: #ff0000;">${categoryName}</span>?`,
                             text: "You won't be able to revert this!",

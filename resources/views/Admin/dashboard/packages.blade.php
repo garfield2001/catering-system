@@ -12,7 +12,8 @@
                 </div>
                 <div class="card-header">
                     <button id="add-package-button" class="card-title btn btn-primary">
-                        <i class="fa-solid fa-plus"></i> Add New</button>
+                        <i class="fa-solid fa-plus"></i> Add New Package
+                    </button>
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
@@ -82,27 +83,28 @@
                 Swal.fire({
                     title: '<span style="color: #007bff; font-weight: bold;">Add New Package</span>',
                     html: `
-                            <form id="add-package-form" method="POST" action="{{ route('packages.store') }}">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="add-package-name" style="text-align: left;">Package Name:</label>
-                                    <input type="text" class="form-control" id="add-package-name" name="name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="add-package-category" style="text-align: left;">Category:</label>
-                                    <select class="form-control" id="add-package-category" name="category_id" required>
-                                        <option value="">Select Category</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="add-package-price" style="text-align: left;">Price:</label>
-                                    <input type="number" class="form-control" id="add-package-price" name="price" required>
-                                </div>
-                            </form>
-                        `,
+                        <form id="add-package-form" method="POST" action="{{ route('packages.store') }}">
+                            @csrf
+                            <div class="form-group">
+                                <label for="add-package-name" style="text-align: left;">Package Name:</label>
+                                <input type="text" class="form-control" id="add-package-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="add-package-category" style="text-align: left;">Category:</label>
+                                <select class="form-control" id="add-package-category" name="category_id" required>
+                                    <option value="">Select Category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="add-package-price" style="text-align: left;">Price:</label>
+                                <input type="number" class="form-control" id="add-package-price" name="price" required>
+                                <p class="text-info">Leave blank if the package has no price</p>
+                            </div>
+                        </form>
+                    `,
                     showCancelButton: true,
                     confirmButtonText: 'Add',
                     cancelButtonText: 'Cancel',
@@ -131,7 +133,6 @@
                             success: function(data) {
                                 // Reload content
                                 loadContent(window.location.href);
-
                                 toastr.success('Package added successfully.');
                             },
                             error: function(xhr, status, error) {
@@ -153,11 +154,39 @@
                 var packageId = $(this).data('package-id');
                 var packageName = $(this).data('package-name');
                 var packageCategory = $(this).data('package-category');
-                var categoryPrice = $(this).data('package-price');
+                var packagePrice = $(this).data('package-price');
 
                 Swal.fire({
-                    title: `Edit or Delete`,
-                    title: `Edit or Delete <span style="color: #64B5F6;">${packageName}</span>?`,
+                    title: `Edit <span style="color: #007bff; font-weight: bold;"> ${packageName}</span>?`,
+                    html: `
+                        <form id="edit-package-form-${packageId}" method="POST" action="/admin/packages/${packageId}">
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="_method" value="PUT">
+                            <input type="hidden" id="edit-package-id" name="id" value="${packageId}">
+                            <div class="form-group">
+                                <label for="edit-package-name">Package Name:</label>
+                                <input type="text" class="form-control" id="edit-package-name" name="name" value="${packageName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-package-category">Category:</label>
+                                <select class="form-control" id="edit-package-category" name="categoryId" required>
+                                    <option value="">Select Category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" 
+                                            @foreach ($packages as $package)
+                                                {{ $category->id == $package->category->id ? 'selected' : '' }} @endforeach>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-package-price">Price:</label>
+                                <input type="number" class="form-control" id="edit-package-price" name="price" value="${packagePrice}" required>
+                                <p class="text-info">Leave blank if the package has no price</p>
+                            </div>
+                        </form>
+                    `,
                     showDenyButton: true,
                     showCancelButton: true,
                     confirmButtonText: `Edit`,
@@ -166,102 +195,31 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // Handle Edit Package button click with SweetAlert2
-                        event.preventDefault();
-
-                        var packageId = $(this).data('package-id');
-                        var packageName = $(this).data('package-name');
-                        var packageCategory = $(this).data('package-category');
-                        var packagePrice = $(this).data('package-price');
-
-                        Swal.fire({
-                            title: '<span style="color: #007bff; font-weight: bold;">Edit Package</span>',
-                            html: `
-                                <form id="edit-package-form-${packageId}" method="POST" action="/admin/packages/${packageId}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                    <input type="hidden" name="_method" value="PUT">
-                                    <input type="hidden" id="edit-package-id" name="id" value="${packageId}">
-                                    <div class="form-group">
-                                        <label for="edit-package-name">Package Name:</label>
-                                        <input type="text" class="form-control" id="edit-package-name" name="name" value="${packageName}" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-package-category">Category:</label>
-                                        <select class="form-control" id="edit-package-category" name="categoryId" required>
-                                            <option value="">Select Category</option>
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}" 
-                                                    @foreach ($packages as $package)
-                                                        {{ $category->id == $package->category->id ? 'selected' : '' }} @endforeach>
-                                                    {{ $category->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="edit-package-price">Price:</label>
-                                        <input type="number" class="form-control" id="edit-package-price" name="price" value="${packagePrice}" required>
-                                    </div>
-                                </form>
-                            `,
-                            showCancelButton: true,
-                            confirmButtonText: 'Update',
-                            cancelButtonText: 'Cancel',
-                            icon: 'warning',
-                            preConfirm: () => {
-                                const name = Swal.getPopup().querySelector(
-                                    '#edit-package-name').value;
-                                const categoryId = Swal.getPopup().querySelector(
-                                    '#edit-package-category').value;
-                                const price = Swal.getPopup().querySelector(
-                                        '#edit-package-price')
-                                    .value;
-                                if (!name || !categoryId || !price) {
-                                    Swal.showValidationMessage(
-                                        `Please enter package name, select a category, and provide a price`
-                                    );
+                        if (result.isConfirmed) {
+                            // Submit the form via AJAX
+                            $.ajax({
+                                url: `/admin/packages/${packageId}`,
+                                method: "PUT",
+                                data: $("#edit-package-form-" + packageId)
+                                    .serialize(),
+                                success: function(data) {
+                                    // Reload content
+                                    loadContent(window.location.href);
+                                    toastr.success(
+                                        'Package updated successfully.');
+                                },
+                                error: function(xhr, status, error) {
+                                    // Handle error
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'Failed to edit package. Please try again later.',
+                                        icon: 'error'
+                                    });
                                 }
-                                return {
-                                    name: name,
-                                    category_id: categoryId,
-                                    price: price
-                                };
-                            },
-                            didOpen: () => {
-                                document.getElementById('edit-package-name').focus();
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Submit the form via AJAX
-                                $.ajax({
-                                    url: `/admin/packages/${packageId}`,
-                                    method: "PUT",
-                                    data: $("#edit-package-form-" + packageId)
-                                        .serialize(),
-                                    success: function(data) {
-                                        // Reload content
-                                        loadContent(window.location.href);
-                                        toastr.success(
-                                            'Package updated successfully.');
-                                    },
-                                    error: function(xhr, status, error) {
-                                        // Handle error
-                                        Swal.fire({
-                                            title: 'Error!',
-                                            text: 'Failed to edit package. Please try again later.',
-                                            icon: 'error'
-                                        });
-                                    }
-                                });
-                            }
-                        });
+                            });
+                        }
                     } else if (result.isDenied) {
                         // Handle delete button click with SweetAlert2
-
-                        event.preventDefault(); // Prevent the form from submitting immediately
-                        var packageId = $(this).data('package-id');
-                        var packageName = $(this).data('package-name');
-                        var form = $('#delete-form-' + packageId);
-
                         Swal.fire({
                             title: `Delete <span style="color: #ff0000;">${packageName}</span>?`,
                             text: "You won't be able to revert this!",
