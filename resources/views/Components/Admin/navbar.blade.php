@@ -5,10 +5,17 @@
             <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="index3.html" class="nav-link">Home</a>
+            <a href="#" class="nav-link">Profile</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="#" class="nav-link">Contact</a>
+            <a href="#" class="nav-link">Settings</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="nav-link"
+                    style="border: none; background: none; cursor: pointer;">logout</button>
+            </form>
         </li>
     </ul>
 

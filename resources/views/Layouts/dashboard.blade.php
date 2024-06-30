@@ -21,19 +21,19 @@
 </head>
 
 <body class='hold-transition sidebar-mini layout-fixed'>
-    <div class="wrapper">
+    <div class="wrapper" style="width: 100%;">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
             <img class="animation__shake" src="{{ asset('assets/images/logo.jpg') }}" alt="AdminLTELogo" height="150"
                 width="150">
         </div>
 
-        @include('components.navbar')
-        @include('components.sidebar');
+        @include('components.admin.navbar')
+        @include('components.admin.sidebar');
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-            @include('components.header')
+            @include('components.admin.header')
             <!-- Main content -->
             <section class="content">
                 @yield('content')
@@ -72,34 +72,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.8/purify.min.js"></script>
 
-
     <script>
-        function loadContent(url) {
-            $.ajax({
-                url: url,
-                method: 'GET',
-                success: function(data) {
-                    // Update content area with the HTML content received from the AJAX response
-                    $('.content-wrapper').html(DOMPurify.sanitize($(data).find('.content-wrapper').html()));
-
-                    // Filter and append the specific script element with the ID 'custom-script'
-                    $('body').append($(data).filter('#custom-script'));
-
-                    // Update document title based on the title received from the AJAX response
-                    var newTitle = $(data).filter('title').text();
-                    if (newTitle) {
-                        $('head title').text(newTitle);
-                    }
-
-                    // Update the active state of navigation links based on the new title
-                    var currentPage = $('a[data-page="' + newTitle.toLowerCase() + '"]');
-                    $('.link').removeClass('active');
-                    currentPage.addClass('active');
-                }
-            });
-        }
-
-        $(document).ready(function() {
+        $(function() {
             // Handler for navigation links click event
             $(document).on('click', 'a.link', function(e) {
                 e.preventDefault();
@@ -132,6 +106,31 @@
             var initialPage = $('a[data-page="' + initialTitle.toLowerCase() + '"]');
             initialPage.addClass('active'); // Add 'active' class to current page link
         });
+
+        function loadContent(url) {
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(data) {
+                    // Update content area with the HTML content received from the AJAX response
+                    $('.content-wrapper').html(DOMPurify.sanitize($(data).find('.content-wrapper').html()));
+
+                    // Filter and append the specific script element with the ID 'custom-script'
+                    $('body').append($(data).filter('#custom-script'));
+
+                    // Update document title based on the title received from the AJAX response
+                    var newTitle = $(data).filter('title').text();
+                    if (newTitle) {
+                        $('head title').text(newTitle);
+                    }
+
+                    // Update the active state of navigation links based on the new title
+                    var currentPage = $('a[data-page="' + newTitle.toLowerCase() + '"]');
+                    $('.link').removeClass('active');
+                    currentPage.addClass('active');
+                }
+            });
+        }
     </script>
     @stack('scripts')
 </body>

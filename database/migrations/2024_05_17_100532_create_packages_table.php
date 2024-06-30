@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('packages', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('category_id');
+            $table->ulid('id')->primary();
+            $table->ulid('category_id');
             $table->string('name');
             $table->decimal('price', 10, 2)->nullable();
             $table->timestamps();

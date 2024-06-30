@@ -1,15 +1,17 @@
 @extends('layouts.dashboard')
 
 @section('title', $title)
-
-
 @section('content')
     <div class="row">
         <div class="col-12">
             <div class="card">
-
-                <div class="card-header">
-                    <h3 class="card-title text-info">Click each row for more actions!</h3>
+                <div class="row">
+                    <div class="card-header">
+                        <h3 class="card-title">Dishes</h3>
+                    </div>
+                    <div class="card-header col-4">
+                        <p class="card-title text-info">Click each row for more actions!</p>
+                    </div>
                 </div>
                 <div class="card-header">
                     <button id="add-dish-button" class="card-title btn btn-primary">
@@ -29,7 +31,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($dishes as $dish)
+                            @foreach ($childDishes as $dish)
                                 <tr data-dish-id="{{ $dish->id }}"
                                     data-dish-group="{{ optional($dish->parentDish)->name }}"
                                     data-dish-package="{{ optional($dish->package)->name }}"
@@ -37,7 +39,8 @@
                                     class="dish-row" data-toggle="tooltip" title="more actions">
                                     <td>{{ $dish->id }}</td>
                                     <td>{{ optional($dish->parentDish)->name ?? 'No Group' }}</td>
-                                    <td>{{ optional($dish->package)->name ?? 'No Package' }}</td>
+                                    <td>{{ optional($dish->package)->name ?? 'No Package' }}
+                                        {{ optional($dish->package->category)->name }}</td>
                                     <td>{{ $dish->name }}</td>
                                     <td>{{ $dish->price ?? 'No Price' }}</td>
                                 </tr>
@@ -65,22 +68,12 @@
 @push('scripts')
     <script id="custom-script">
         $(document).ready(function() {
-            $("#table").DataTable({
+            var table = $("#table").DataTable({
                 responsive: true,
                 lengthChange: false,
                 autoWidth: false,
                 buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"]
             }).buttons().container().appendTo('#table_wrapper .col-md-6:eq(0)');
-
-            // Handle row hover effect
-            $('.dish-row').hover(
-                function() {
-                    $(this).css('cursor', 'pointer');
-                },
-                function() {
-                    $(this).css('cursor', 'default');
-                }
-            );
 
             // Handle Add Dish button click with SweetAlert2
             $('#add-dish-button').click(function(event) {
@@ -95,11 +88,8 @@
                                 <label for="add-dish-group">Group Dish:</label>
                                 <select class="form-control" id="add-dish-group" name="parent_id">
                                     <option value="">Select Group</option>
-                                    @foreach ($dishes as $dish)
-                                        /* Fix Me */ 
-                                        @if ($dish->package_id)
-                                            <option value="{{ $dish->id }}"> {{ $dish->name }} </option>
-                                        @endif
+                                    @foreach ($parentDishes as $dish)
+                                        <option value="{{ $dish->id }}"> {{ $dish->name }} </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -108,7 +98,7 @@
                                 <select class="form-control" id="add-dish-package" name="package_id">
                                     <option value="">Select Package</option>
                                     @foreach ($packages as $package)
-                                        <option value="{{ $package->id }}">{{ $package->name }}</option>
+                                        <option value="{{ $package->id }}">{{ $package->name }} / {{ $package->category->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -146,8 +136,27 @@
                             method: "POST",
                             data: $("#add-dish-form").serialize(),
                             success: function(data) {
-                                // Reload content
                                 loadContent(window.location.href);
+                                // Remove "No data available in table" row
+                                /* if ($("#table tbody tr td").hasClass(
+                                                                                                                    "dataTables_empty")) {
+                                                                                                                $("#table tbody tr").remove();
+                                                                                                            }
+                                                                                                            // Reupdate row
+                                                                                                            var newRow = `
+                                <tr data-dish-id="${data.dish.id}"
+                                    data-dish-group="${data.dish.parent_id.name}"
+                                    data-dish-package="${data.dish.package.name}"
+                                    data-dish-name="${data.dish.name}" data-dish-price="${data.dish.price}"
+                                    class="dish-row" data-toggle="tooltip" title="more actions">
+                                    <td>${data.dish.id}</td>
+                                    <td>${data.dish.parent_id.name}</td>
+                                    <td>${data.dish.package.name}</td>
+                                    <td>${data.dish.name}</td>
+                                    <td>${data.dish.price}</td>
+                                </tr>
+                            `;
+                                                                                                            $('#table tbody').append(newRow); */
 
                                 toastr.success('Dish added successfully.');
                             },
@@ -164,7 +173,8 @@
                 });
             });
 
-            $('.dish-row').click(function(event) {
+            // Event delegation for dish row clicks
+            $('#table').on('click', '.dish-row', function(event) {
                 event.preventDefault();
 
                 var dishId = $(this).data('dish-id');
@@ -172,7 +182,6 @@
                 var dishPackage = $(this).data('dish-package');
                 var dishName = $(this).data('dish-name');
                 var dishPrice = $(this).data('dish-price');
-
 
                 Swal.fire({
                     title: `Edit <span style="color: #64B5F6;">${dishName}</span>?`,
@@ -185,10 +194,11 @@
                             <label for="edit-dish-group">Group Dish:</label>
                             <select class="form-control" id="edit-dish-group" name="parent_id">
                                 <option value="">Select Group</option>
-                                @foreach ($dishes as $dish1)
-                                    @if ($dish1->package_id)
-                                        <option value="{{ $dish1->id }}">{{ $dish1->name }}</option>
-                                    @endif
+                                @foreach ($parentDishes as $parentDish)
+                                    <option value="{{ $parentDish->id }}"
+                                        ${dishGroup === '{{ $parentDish->name }}' ? 'selected' : ''}>
+                                        {{ $parentDish->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -197,7 +207,11 @@
                             <select class="form-control" id="edit-dish-package" name="package_id">
                                 <option value="">Select Package</option>
                                 @foreach ($packages as $package)
-                                    <option value="{{ $package->id }}">{{ $package->name }}</option>
+                                    <option value="{{ $package->id }}"
+                                        @foreach ($dishes as $dish)
+                                            {{ $package->id == optional($dish->package)->id ? 'selected' : ' ' }} @endforeach>
+                                        {{ $package->name }} / {{ $package->category->name }}    
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -263,6 +277,16 @@
                                         loadContent(window.location.href);
                                         toastr.success(
                                             'Dish deleted successfully.');
+
+                                        // Check if table is empty
+                                        if ($('#table tbody tr').length === 0) {
+                                            var noDataRow = `
+                                                <tr class="no-data">
+                                                    <td colspan="2" class="text-center">No data available in table</td>
+                                                </tr>
+                                            `;
+                                            $('#table tbody').append(noDataRow);
+                                        }
                                     },
                                     error: function(xhr, status, error) {
                                         // Handle error
@@ -278,6 +302,17 @@
                     }
                 });
             });
+
+
+            // Initial binding of hover effects
+            $('#table').on('mouseenter mouseleave', '.dish-row', function(event) {
+                if (event.type === 'mouseenter') {
+                    $(this).css('cursor', 'pointer');
+                } else {
+                    $(this).css('cursor', 'default');
+                }
+            });
+
         });
     </script>
 @endpush

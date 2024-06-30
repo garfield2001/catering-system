@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+
 use App\Http\Controllers\Controller;
-use App\Models\Admin\AdminUser;
+use App\Models\AdminUser;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -13,7 +14,7 @@ class DashboardController extends Controller
         // Retrieve the authenticated user
         $user = Auth::user();
 
-        return view("admin.dashboard.index", [
+        return view("admin.index", [
             'title' => 'Dashboard',
             'user' => $user
         ]);

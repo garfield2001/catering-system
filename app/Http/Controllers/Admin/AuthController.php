@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Admin\AdminUser;
+use App\Models\AdminUser;
 
 class AuthController extends Controller
 {
@@ -19,7 +19,7 @@ class AuthController extends Controller
 
         if (Auth::guard('admin_users')->attempt($credentials)) {
             return redirect()->route('dashboard.index')->with([
-                'success' => 'Login successful.', 
+                'success' => 'Login successful.',
             ]);
         }
 
@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->route('login.show');
+        return redirect()->route('login.show')->with('success', 'Logged out successfully.');
     }
 
     public function showLoginForm()
@@ -64,5 +64,11 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         return view("Admin.auth.register");
+    }
+
+
+    public function showLockScreen()
+    {
+
     }
 }

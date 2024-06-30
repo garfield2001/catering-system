@@ -1,18 +1,24 @@
 <?php
-use App\Http\Controllers\Admin\AdminController;
+
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CateringPackagesController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CateringController;
-use App\Http\Controllers\DishController;
-use App\Http\Controllers\PackageController;
-use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\Admin\DishController;
+use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
+use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Customer\ReservationController as CustomerReservationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
-    // Redirect to admin login for the root and /admin routes
-    Route::redirect('/', '/admin/login');
-    Route::redirect('/admin', '/admin/login');
+    // Redirect to admin login? for the root and /admin routes
+    /* Route::redirect('/', 'admin'); */
+    /* Route::redirect('/admin', '/admin/login'); */
+    /* Route::get('/admin', [AuthController::class, 'showLoginForm'])->name('login.show'); */
+    Route::get('/admin', function () {
+        echo 'hello world!';    
+    })->name('login.show');
 
     // Authentication routes
     Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('login.show');
@@ -21,11 +27,13 @@ Route::middleware('web')->group(function () {
     Route::get('/admin/register', [AuthController::class, 'showRegisterForm'])->name('register.show');
     Route::post('/admin/register', [AuthController::class, 'register'])->name('register');
 
+    Route::get('/admin/lock_screen', [AuthController::class, 'showLockScreen'])->name('lockScreen.show');
+
     // Routes protected by auth middleware
     Route::middleware('auth:admin_users')->prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-
-        // Category routes
+         
+        /* Category routes */
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
         Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
@@ -43,14 +51,24 @@ Route::middleware('web')->group(function () {
         Route::put('/dishes/{dish}', [DishController::class, 'update'])->name('dishes.update');
         Route::delete('/dishes/{dish}', [DishController::class, 'destroy'])->name('dishes.destroy');
 
+        // Catering Packages Routes
+        Route::get('/catering_packages', [CateringPackagesController::class, 'index'])->name('cateringPackages.index');
+
         // Reservation Routes
-        Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.index');
+        Route::get('/reservations', [AdminReservationController::class, 'index'])->name('reservations.index');
 
         // Logout route
-        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
-
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         // Test route
         Route::get('/test', [DashboardController::class, 'test'])->name('test.index');
     });
+
+    // Customer Routes
+    /* 
+    * Main Route 
+    */
+    /* Route::get('/', [CustomerController::class, 'index'])->name('customer.index'); */
+
+    Route::get('/reservations', [CustomerReservationController::class, 'show'])->name('reservations.index');
 });

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Package;
 use Illuminate\Http\Request;
@@ -14,11 +15,10 @@ class PackageController extends Controller
         // Retrieve the authenticated user
         $user = Auth::user();
 
-
-        $packages = Package::with('category')->get();
+        $packages = Package::with('category', 'dishes')->get();
         $categories = Category::all();
 
-        return view('admin.dashboard.packages', [
+        return view('admin.packages', [
             'user' => $user,
             'title' => 'Packages',
             'packages' => $packages,
@@ -40,9 +40,19 @@ class PackageController extends Controller
             'price' => 'nullable|numeric', // Add validation for price
         ]);
 
-        Package::create($request->only('name', 'category_id', 'price')); // Include category_id and price
+        $package = Package::create($request->only('name', 'category_id', 'price')); // Include category_id and price
 
-        return response()->json(['success' => true, 'message' => 'Package added successfully.']);
+        /* $category = Category::find($request->category_id); */
+
+
+        // Load the related category
+        $package->load('category');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Package added successfully.',
+            'package' => $package
+        ]);
     }
 
     public function update(Request $request, Package $package)
@@ -52,13 +62,16 @@ class PackageController extends Controller
         $request->merge([
             'name' => $name
         ]); // merge the modified input back into the request
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
-        $package->update($request->only('name', 'categoryId', 'price'));
+        // Load the related category
+        /* $package->load('category'); */
 
-        return response()->json(['success' => true, 'message' => 'Package updated successfully.']);
+        $package->update($request->only('name', 'category_id', 'price'));
+
+        return response()->json(['success' => true, 'message' => 'Package updated successfully.', 'package' => $package]);
     }
 
     public function destroy(Package $package)

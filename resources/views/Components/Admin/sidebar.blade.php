@@ -1,7 +1,7 @@
 <aside class="main-sidebar sidebar-dark-secondary elevation-4">
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
-        <img src="{{ asset('assets/images/logo.jpg') }}" alt="Zek Logo" class="brand-image img-circle elevation-3"
+        <img src="{{ asset('images/logo.jpg') }}" alt="Zek Logo" class="brand-image img-circle elevation-3"
             style="opacity: .8">
         <span class="brand-text font-weight-light">Zek Catering</span>
     </a>
@@ -47,6 +47,15 @@
                 </li>
                 <li class="nav-header">Admin</li>
                 <li class="nav-item">
+                    <a href="{{ route('cateringPackages.index') }}" data-page="cateringPackages"
+                        class="link nav-link {{ $title == 'Catering Packages' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            CATERING PACKAGES
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ route('categories.index') }}" data-page="categories"
                         class="link nav-link {{ $title == 'Categories' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-box"></i>
@@ -79,10 +88,37 @@
                         class="link nav-link {{ $title == 'Reservations' ? 'active' : '' }}">
                         <i class="nav-icon fas fa-box"></i>
                         <p>
-                            Reservations
+                            RESERVATIONS
                         </p>
                     </a>
                 </li>
+                {{-- <li class="nav-item">
+                    <a href="{{  }}" data-page="customers"
+                        class="link nav-link {{ $title == 'Customers' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            CUSTOMERS
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{  }}" data-page="customers"
+                        class="link nav-link {{ $title == 'Customers' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            Payments
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{  }}" data-page="staffs"
+                        class="link nav-link {{ $title == 'Staffs' ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <p>
+                            Staffs
+                        </p>
+                    </a>
+                </li> --}}
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
